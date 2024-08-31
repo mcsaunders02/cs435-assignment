@@ -24,13 +24,13 @@ if not os.path.exists(OUTPUT_PATH):
 
 # Get the list of file names, not including the extensions
 # Set is easier for avoiding duplicates, then it can be turned back into a list
-file_names: set[str] = set()
+file_names_set: set[str] = set()
 
 for file_name in os.listdir(DIRECTORY_PATH):
     # The file extension is always 3 characters long
-    file_names.add(file_name[:-4])
+    file_names_set.add(file_name[:-4])
     
-file_names = list(file_names)
+file_names = list(file_names_set)
 
 # For each file name, get the nodes with no children and highlight them, then save the resulting .PNG in a new file
 for file_name in file_names:
@@ -50,13 +50,12 @@ for file_name in file_names:
     
     for item in parsed_xml.iter():
         # Find which nodes have no child nodes
-        if len(item.findall("node")) == 0:
+        if item.find("node") is None:
             # Find the bounds of the node
             bounds = item.attrib["bounds"]
             
             # Parse the values
             x1, y1, x2, y2 = ints(bounds)
-            
             
             # Draw rectangles based on the bounds
             # Left side
@@ -71,7 +70,9 @@ for file_name in file_names:
             # Bottom side
             draw.rectangle((x1 - HIGHLIGHT_HALF_WIDTH, y2 - HIGHLIGHT_HALF_WIDTH, x2 + HIGHLIGHT_HALF_WIDTH, y2 + HIGHLIGHT_HALF_WIDTH), fill = HIGHLIGHT_COLOR)
     
+    # Save image to new file
     image.save(f"output/{file_name}.png")
             
+    # Close opened files
     xml_file.close()
     image.close()
